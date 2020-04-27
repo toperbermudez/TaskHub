@@ -1,0 +1,107 @@
+<h3 class="my-4 align-items-center">
+  <span class="text-secondary mr-3"><i class="fa fa-users-cog"></i></span> Teams
+    <button ng-click="showNewModal()" class="btn btn-default text-primary" title="Add new team"><i class="fa fa-plus"></i></button>
+</h3>
+
+<div class="row">
+  <div ng-show="teams.length != 0" class="col-sm-3">
+    <input ng-model="filterTeam" type="text" class="form-control" placeholder="Search team..">
+  </div>
+</div>
+
+<div class="row">
+    <div class="col-sm-12" ng-show="teams.length == 0">
+      <div class="alert alert-info text-center" role="alert">
+        <em>Data not found.</em>
+      </div>
+    </div>
+
+    <div ng-repeat="team in teams | filter:{ TeamName:filterTeam }"class="col-sm-3 mt-4 repeat-animation">
+        <div ng-mouseover="showtrash[$index] = true;" ng-mouseout="showtrash[$index] = false" class="card">
+          <div class="card-header pb-0">
+            <span ng-click="remove(team.TeamId)" ng-class="{'invisible': !showtrash[$index]}" class="float-right link-danger" aria-label="Close" title="Remove team">
+              <i class="fa fa-times"></i>
+            </span>
+
+            <h6 class="card-title d-flex align-items-center justify-content-between">
+              <span ng-click="showEditModal(team.TeamId)" class="link">{{ team.TeamName }}</span>
+          </h6>
+          </div>
+            <div class="card-body pt-0">
+            <p ng-click="showUsersModal(team.TeamId)" class="card-text link" title="Add/remove users"><i class="fa fa-user-friends"></i> {{ team.Users }}</p>
+            </div>
+        </div>
+    </div>
+</div>
+
+<!-- Modal New Team -->
+<div class="modal fade" id="modal-new" tabindex="-1" role="dialog" aaria-hidden="true">
+    <div class="modal-dialog" role="document">
+      <div class="modal-content">
+        <div class="modal-header pb-0 border-bottom-0">
+          <button type="button" class="close" data-dismiss="modal" aria-label="Close">
+            <span aria-hidden="true">&times;</span>
+          </button>
+        </div>
+        <div class="modal-body">
+          <input ng-model="teamname" type="text" class="form-control" placeholder="Team name here..">
+        </div>
+        <div class="modal-footer">
+          <button ng-click="add(teamname)" type="button" class="btn btn-primary px-5"><i class="fa fa-plus"></i> Add</button>
+        </div>
+      </div>
+    </div>
+</div>
+
+<!-- Modal Update Teams -->
+<div class="modal fade" id="modal-edit" tabindex="-1" role="dialog" aaria-hidden="true">
+  <div class="modal-dialog" role="document">
+    <div class="modal-content">
+      <div class="modal-header pb-0 border-bottom-0">
+        <button type="button" class="close" data-dismiss="modal" aria-label="Close">
+          <span aria-hidden="true">&times;</span>
+        </button>
+      </div>
+      <div class="modal-body">
+        <input ng-model="teamname" type="text" class="form-control" placeholder="Team name here..">
+      </div>
+      <div class="modal-footer">
+        <button ng-click="update(teamid,teamname)" type="button" class="btn btn-primary px-5"><i class="fa fa-save"></i> Update</button>
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- Modal Users -->
+<div class="modal fade" id="modal-users" tabindex="-1" role="dialog" aaria-hidden="true">
+  <div class="modal-dialog" role="document">
+    <div class="modal-content">
+      <div class="modal-header pb-0 border-bottom-0">
+        <h5 class="modal-title">{{ teamname }}</h5>
+        <button type="button" class="close" data-dismiss="modal" aria-label="Close">
+          <span aria-hidden="true">&times;</span>
+        </button>
+      </div>
+      <div class="modal-body">
+        <input ng-disabled="loading" ng-model='searchUser'
+                                   uib-typeahead='item.EmpCode as item.EmpName for item in employees | filter:$viewValue | limitTo: 10'
+                                   typeahead-on-select="resetEmployee($item,$model,$label)"
+                                   class="form-control form-control-sm"
+                                   placeholder="Search employee to add...">
+        <div class="mt-4">
+          <input ng-model="filterUsers" type="text" class="form-control form-control-sm mb-2 float-right w-50" placeholder="Search user from list">
+          <div class="table-wrapper">
+            <table class="table table-hover">
+              <tbody>
+                <tr ng-repeat="user in users | filter:{EmpName:filterUsers}">
+                  <td>{{ user.EmpName }}</td>
+                  <td ng-click="removeUser(teamid,user.EmpCode)" class="text-center link-danger" title="Remove user from group"><i class="fa fa-times"></i></td>
+                </tr>
+              </tbody>
+            </table>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>

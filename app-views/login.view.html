@@ -1,0 +1,24 @@
+<div id="layoutSidenav_content">
+    <div class="container-fluid pb-5">
+        <div class="row my-5">
+            <div class="col-sm-4 offset-sm-4 text-center px-5 mt-5">
+                <h2 class="font-weight-light text-secondary">TASKHUB</h2>
+                <div class="card mt-3">
+                    <div class="card-body mt-3 mb-5">
+                        <img src="/resources/download.png" width="86" class="img-responsive rounded mb-3 hvr-bob" alt="Hi-Precision Diagnostics" title="Hi-Precision Diagnostics">
+                        <form ng-submit="login()">
+                            <div class="form-group">
+                                <label for="username" class="sr-only">Username</label>
+                                <input type="text" id="username" class="form-control font-normal rounded p-2 mb-4" placeholder="Username" ng-model="username" required>
+                                <label for="password" class="sr-only">Password</label>
+                                <input ng-disabled="loading" type="password" id="password" class="form-control font-normal p-2 mb-4 rounded" placeholder="Password" ng-model="password" required>
+                            </div>
+                            <button ng-disabled="loading" class="btn btn-lg btn-primary font-lg btn-block rounded py-2 hvr-icon-back" type="submit"><i class="fa fa-user-lock hvr-icon"></i> Sign in</button>
+                            <img ng-if="loading" src="data:image/gif;base64,R0lGODlhEAAQAPIAAP///wAAAMLCwkJCQgAAAGJiYoKCgpKSkiH/C05FVFNDQVBFMi4wAwEAAAAh/hpDcmVhdGVkIHdpdGggYWpheGxvYWQuaW5mbwAh+QQJCgAAACwAAAAAEAAQAAADMwi63P4wyklrE2MIOggZnAdOmGYJRbExwroUmcG2LmDEwnHQLVsYOd2mBzkYDAdKa+dIAAAh+QQJCgAAACwAAAAAEAAQAAADNAi63P5OjCEgG4QMu7DmikRxQlFUYDEZIGBMRVsaqHwctXXf7WEYB4Ag1xjihkMZsiUkKhIAIfkECQoAAAAsAAAAABAAEAAAAzYIujIjK8pByJDMlFYvBoVjHA70GU7xSUJhmKtwHPAKzLO9HMaoKwJZ7Rf8AYPDDzKpZBqfvwQAIfkECQoAAAAsAAAAABAAEAAAAzMIumIlK8oyhpHsnFZfhYumCYUhDAQxRIdhHBGqRoKw0R8DYlJd8z0fMDgsGo/IpHI5TAAAIfkECQoAAAAsAAAAABAAEAAAAzIIunInK0rnZBTwGPNMgQwmdsNgXGJUlIWEuR5oWUIpz8pAEAMe6TwfwyYsGo/IpFKSAAAh+QQJCgAAACwAAAAAEAAQAAADMwi6IMKQORfjdOe82p4wGccc4CEuQradylesojEMBgsUc2G7sDX3lQGBMLAJibufbSlKAAAh+QQJCgAAACwAAAAAEAAQAAADMgi63P7wCRHZnFVdmgHu2nFwlWCI3WGc3TSWhUFGxTAUkGCbtgENBMJAEJsxgMLWzpEAACH5BAkKAAAALAAAAAAQABAAAAMyCLrc/jDKSatlQtScKdceCAjDII7HcQ4EMTCpyrCuUBjCYRgHVtqlAiB1YhiCnlsRkAAAOwAAAAAAAAAAAA==" />
+                        </form>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>

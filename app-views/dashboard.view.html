@@ -1,0 +1,400 @@
+<h3 class="my-4"><span class="text-secondary mr-3"><i class="fa fa-tachometer-alt"></i></span> Dashboard</h3>
+
+<div ng-show="!taskMode" class="row">
+    <div class="col-sm-6">
+        <div class="card">
+            <div class="card-header">
+                <h5 class="card-title">Folders</h5>
+            </div>
+            <div class="card-body pt-0">
+                <div ng-show="folders.length==0" class="alert alert-light text-center">
+                    <em>Data not found.</em>
+                </div>
+                <input ng-show="folders.length > 0" ng-model="searchFolder" type="text" class="form-control mb-2" placeholder="Search folder..">
+                <div class="table-wrapper">
+                    <table class="table table-hover">
+                        <thead class="thead-light">
+                            <tr class="text-center">
+                                <th class="font-weight-light">FolderName</th>
+                                <th class="font-weight-light">Lists</th>
+                                <th class="font-weight-light">Tasks</th>
+                                <th class="font-weight-light">High</th>
+                                <th class="font-weight-light">Normal</th>
+                                <th class="font-weight-light">Low</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            <tr ng-repeat="item in folders | filter:{FolderName: searchFolder}" class="repeat-animation">
+                                <td><span ng-click="getlists(item.FolderId)" class="link hvr-forward">{{item.FolderName}}</span></td>
+                                <td class="text-center">{{item.Lists | number}}</td>
+                                <td class="text-center">{{item.Tasks | number}}</td>
+                                <td class="text-center">{{item.High | number}}</td>
+                                <td class="text-center">{{item.Normal | number}}</td>
+                                <td class="text-center">{{item.Low | number}}</td>
+                            </tr>
+                        </tbody>
+                    </table>
+                </div>
+            </div>
+        </div>
+    </div>
+
+<!-------------------------------LIST VIEW------------------------------>
+    <div class="col-sm-6">
+        <div ng-show="listmode" class="card">
+            <div class="card-header">
+                <h5 class="card-title">{{folder.FolderName}}</h5>
+            </div>
+            <div class="card-body pt-0">
+                <div ng-show="lists.length==0" class="alert alert-light text-center">
+                    <em>Data not found.</em>
+                </div>
+                <input ng-show="lists.length > 0" ng-model="searchList" type="text" class="form-control mb-2" placeholder="Search list..">
+                <div class="table-wrapper">
+                    <table ng-show="lists.length > 0" class="table table-hover">
+                        <thead class="thead-light">
+                            <tr class="text-center">
+                                <th class="font-weight-light">List</th>
+                                <th class="font-weight-light">Tasks</th>
+                                <th class="font-weight-light">High</th>
+                                <th class="font-weight-light">Normal</th>
+                                <th class="font-weight-light">Low</th>
+                                <th class="font-weight-light">Users</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            <tr ng-repeat="item in lists | filter:{ListName: searchList}" class="repeat-animation">
+                                <td>
+                                    <span class="hvr-forward">
+                                        <span ng-show="item.Type=='TASKS'" ng-click="getTasks(item.ListId)" class="link">{{item.ListName}}</span> 
+                                        <span ng-show="item.Type=='BP'" ng-click="getBlueprints(item.ListId)" class="link">{{item.ListName}}</span> 
+                                        <span class="badge badge-{{item.Type=='BP'? 'primary':'warning'}}">{{item.Type=='BP'?'Blueprints':'Tasks'}}</span>
+                                    </span>
+                                </td>
+                                <td class="text-center">{{item.Tasks | number}}</td>
+                                <td class="text-center">{{item.High | number}}</td>
+                                <td class="text-center">{{item.Normal | number}}</td>
+                                <td class="text-center">{{item.Low | number}}</td>
+                                <td class="text-center">{{item.Users | number}}</td>
+                            </tr>
+                        </tbody>
+                    </table>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+<!-----------------------------------------TASKS VIEW--------------------------------------------->
+<h5 ng-show="taskMode" class="my-3">
+    <span ng-click="taskMode = false" class="link hvr-icon-back" title="Go back">
+        <i class="fa fa-arrow-left hvr-icon"></i>
+    </span> 
+    <span>
+        {{list.ListName}} 
+        <span class="badge badge-{{list.Type=='BP'? 'primary':'warning'}}">{{list.Type=='BP'?'Blueprints':'Tasks'}}</span>
+    </span>
+</h5>
+
+<div ng-show="taskMode" class="row">
+    <div ng-repeat="stat in statuses" data-statid="{{stat.StatId}}" class="col-sm-3 repeat-animation stat-container">
+        <div class="card">
+            <div class="card-header">
+                <h6 class="my-0 d-flex justify-content-between align-items-center">
+                    <span>{{stat.StatName}} <span class="small"><sub class="badge badge-warning">{{ stat.Tasks.length == 0 ? '' :  stat.Tasks.length }}</sub></span></span>
+                    <button ng-show="stat.StatId == 1 && list.Type=='TASKS'" ng-click="modalNewTask()" class="btn btn-default text-secondary hvr-icon-bob my-0 py-0" title="Add new task"><i class="fa fa-plus hvr-icon"></i></button>
+                    <button ng-show="stat.StatId == 1 && list.Type=='BP'" ng-click="modalNewBlueprint()" class="btn btn-default text-secondary hvr-icon-bob my-0 py-0" title="Add new blueprint"><i class="fa fa-plus hvr-icon"></i></button>
+                </h6>
+            </div>
+        </div>
+        <!--TASKS-->
+        <div ng-show="list.Type=='TASKS'" ui-sortable="stat.sortOption" ng-model="stat.Tasks" class="tasks-container pb-5">
+            <div ng-click="modalEditTask(taskitem)" ng-repeat="taskitem in stat.Tasks" class="card card-task pointer mt-2 repeat-animation hvr-forward">
+                <div class="card-body pt-1 pb-0">
+                    <span class="d-flex d-block justify-content-between small text-muted">
+                        <span ng-show="stat.StatId==1">{{taskitem.CreatedBy}}</span>
+                        <span ng-show="stat.StatId==1">{{taskitem.DateCreated}}</span>
+                        <span ng-show="stat.StatId!=1 && stat.Typ=='OPEN'">{{taskitem.StartedBy}}</span>
+                        <span ng-show="stat.StatId!=1 && stat.Typ=='OPEN'">{{taskitem.DateStarted}}</span>
+                        <span ng-show="stat.Typ=='CLOSED'">{{taskitem.ClosedBy}}</span>
+                        <span ng-show="stat.Typ=='CLOSED'">{{taskitem.DateClosed}}</span>
+                    </span>
+                    <span class="card-text">{{taskitem.TaskName}}</span>
+                </div>
+                <div class="card-footer pt-0 pb-1 bg-white border-0">
+                    <span ng-class="{'badge-danger':taskitem.Prio=='HIGH', 'badge-info':taskitem.Prio=='NORMAL', 'badge-secondary':taskitem.Prio=='LOW'}"
+                         class="badge badge-pill">{{taskitem.Prio}}</span> 
+                    <span class="badge badge-pill badge-success">{{taskitem.DateDue | date:'mediumDate'}}</span> 
+                </div>
+            </div>
+        </div>
+        <!--BLUEPRINTS-->
+        <div ng-show="list.Type=='BP'" ui-sortable="stat.sortOption" ng-model="stat.Tasks" class="blueprints-container pb-5">
+            <div ng-show="list.Type=='BP'" ng-click="modalEditBlueprint(taskitem)" ng-repeat="taskitem in stat.Tasks" class="card card-task pointer mt-2 repeat-animation hvr-forward">
+                <div class="card-body pt-1 pb-0">
+                    <span class="d-flex d-block justify-content-between small text-muted">
+                        <span ng-show="stat.StatId==1">{{taskitem.CreatedBy}}</span>
+                        <span ng-show="stat.StatId==1">{{taskitem.DateCreated}}</span>
+                        <span ng-show="stat.StatId!=1 && stat.Typ=='OPEN'">{{taskitem.StartedBy}}</span>
+                        <span ng-show="stat.StatId!=1 && stat.Typ=='OPEN'">{{taskitem.DateStarted}}</span>
+                        <span ng-show="stat.Typ=='CLOSED'">{{taskitem.ClosedBy}}</span>
+                        <span ng-show="stat.Typ=='CLOSED'">{{taskitem.DateClosed}}</span>
+                    </span>
+                    <span class="card-text">{{taskitem.BPName}}</span>
+                </div>
+                <div class="card-footer pt-0 pb-1 bg-white border-0">
+                    <span ng-class="{'badge-danger':taskitem.Prio=='HIGH', 'badge-info':taskitem.Prio=='NORMAL', 'badge-secondary':taskitem.Prio=='LOW'}"
+                         class="badge badge-pill">{{taskitem.Prio}}</span> 
+                    <span class="badge badge-pill badge-success">{{taskitem.DateDue | date:'mediumDate'}}</span> 
+                </div>
+            </div>
+        </div>
+
+    </div>
+</div>
+
+<!-------------------------------------- MODALS ---------------------------------------->
+
+<!--NEW BLUEPRINTS---------------------------------------------------------------------------->
+<div class="modal fade" id="modal-new-blueprint" tabindex="-1" role="dialog">
+    <div class="modal-dialog modal-lg" role="document">
+        <div class="modal-content">
+            <form ng-submit="addBlueprint()">
+                <div class="modal-header">
+                    <h5 class="modal-title"><span class="text-muted mr-3"><i class="fa fa-drafting-compass"></i></span> Create Blueprint</h5>
+                    <button type="button" class="close" data-dismiss="modal" aria-label="Close">
+                    <span aria-hidden="true">&times;</span>
+                    </button>
+                </div>
+                <div class="modal-body">
+                    <div class="form-group">
+                        <label class="mb-0">Blueprint Code</label>
+                        <input ng-model="blueprint.BPCode" type="text" class="form-control" placeholder="Blueprint code here.." required>
+                    </div>
+
+                    <div class="form-group">
+                        <label class="mb-0">Blueprint Name</label>
+                        <input ng-model="blueprint.BPName" type="text" class="form-control" placeholder="Blueprint name here.." required>
+                    </div>
+    
+                    <div class="form-group">
+                        <label class="mb-0">Description</label>
+                        <textarea ng-model="blueprint.Descrip" rows="3" class="form-control"></textarea>
+                    </div>
+    
+                    <div class="form-row">
+                        <div class="form-group col-sm-4">
+                            <label class="mb-0">Priority</label>
+                            <select ng-model="blueprint.Prio" ng-options="prio as prio for prio in priorities" class="form-control form-control-sm" required></select>
+                        </div>
+
+                        <div class="form-group col-sm-4">
+                            <label class="mb-0">Date Submitted</label>
+                            <input ng-model="blueprint.DateSubmitted" type="date" class="form-control" required>
+                        </div>
+    
+                        <div class="form-group col-sm-4">
+                            <label class="mb-0">Date Due</label>
+                            <input ng-model="blueprint.DateDue" type="date" class="form-control" required>
+                        </div>
+                    </div>
+                </div>
+                <div class="modal-footer">
+                    <button type="submit" class="btn btn-primary hvr-icon-back"><i class="fa fa-plus hvr-icon"></i> Add Blueprint</span></button>
+                </div>
+            </form>
+        </div>
+    </div>
+</div>
+
+<!--EDIT BLUEPRINTS---------------------------------------------------------------------------->
+<div class="modal fade" id="modal-edit-blueprint" tabindex="-1" role="dialog">
+    <div class="modal-dialog modal-lg" role="document">
+        <div class="modal-content">
+            <form ng-submit="updateBlueprint(blueprint)">
+                <div class="modal-header">
+                    <h5 class="modal-title"><span class="text-muted mr-3"><i class="fa fa-drafting-compass"></i></span> Modify Blueprint</h5>
+                    <button type="button" class="close" data-dismiss="modal" aria-label="Close">
+                    <span aria-hidden="true">&times;</span>
+                    </button>
+                </div>
+                <div class="modal-body border-bottom py-2">
+                    <div class="form-row mb-2">
+                        <div class="col-sm-4">
+                            <div class="form-group mb-0">
+                                <label class="small text-muted mb-0">CREATED</label>
+                                <input ng-model="blueprint.DateCreated" type="text" class="form-control form-control-sm mb-2" readonly>
+                                <input ng-model="blueprint.CreatedBy" type="text" class="form-control form-control-sm" readonly>
+                            </div>
+                        </div>
+                        <div class="col-sm-4">
+                            <div class="form-group mb-0">
+                                <label class="small text-muted mb-0">STARTED</label>
+                                <input ng-model="blueprint.DateStarted" type="text" class="form-control form-control-sm mb-2" readonly>
+                                <input ng-model="blueprint.StartedBy" type="text" class="form-control form-control-sm" readonly>
+                            </div>
+                        </div>
+                        <div class="col-sm-4">
+                            <div class="form-group mb-0">
+                                <label class="small text-muted mb-0">CLOSED</label>
+                                <input ng-model="blueprint.DateClosed" type="text" class="form-control form-control-sm mb-2" readonly>
+                                <input ng-model="blueprint.ClosedBy" type="text" class="form-control form-control-sm" readonly>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="modal-body pt-2">
+                    <div class="form-group">
+                        <label class="mb-0">Blueprint Code</label>
+                        <input ng-model="blueprint.BPCode" type="text" class="form-control" placeholder="Blueprint code here.." required>
+                    </div>
+
+                    <div class="form-group">
+                        <label class="mb-0">Blueprint Name</label>
+                        <input ng-model="blueprint.BPName" type="text" class="form-control" placeholder="Blueprint name here.." required>
+                    </div>
+    
+                    <div class="form-group">
+                        <label class="mb-0">Description</label>
+                        <textarea ng-model="blueprint.Descrip" rows="3" class="form-control"></textarea>
+                    </div>
+    
+                    <div class="form-row">
+                        <div class="form-group col-sm-4">
+                            <label class="mb-0">Priority</label>
+                            <select ng-model="blueprint.Prio" ng-options="prio as prio for prio in priorities" class="form-control form-control-sm" required></select>
+                        </div>
+
+                        <div class="form-group col-sm-4">
+                            <label class="mb-0">Date Submitted</label>
+                            <input ng-model="blueprint.DateSubmitted" type="date" class="form-control">
+                        </div>
+    
+                        <div class="form-group col-sm-4">
+                            <label class="mb-0">Date Due</label>
+                            <input ng-model="blueprint.DateDue" type="date" class="form-control">
+                        </div>
+                    </div>
+                </div>
+                <div class="modal-footer">
+                    <button type="submit" class="btn btn-primary hvr-icon-back"><i class="fa fa-save hvr-icon"></i> Update Blueprint</button>
+                    <button ng-click="removeBlueprint(blueprint)" type="button" class="btn btn-danger hvr-icon-back"><i class="fa fa-trash hvr-icon"></i> Delete Blueprint</button>
+                    <button ng-click="completeBlueprint(blueprint)" ng-show="showCompleteBtn" type="button" class="btn btn-success hvr-icon-back"><i class="fa fa-check hvr-icon"></i> <span class="hvr-icon">Complete Blueprint</span></button>
+                </div>
+            </form>
+        </div>
+    </div>
+</div>
+
+<!--NEW TASK---------------------------------------------------------------------------->
+<div class="modal fade" id="modal-new-task" tabindex="-1" role="dialog">
+    <div class="modal-dialog modal-lg" role="document">
+        <div class="modal-content">
+            <form ng-submit="addTask()">
+                <div class="modal-header">
+                    <h5 class="modal-title"><span class="text-muted mr-3"><i class="fa fa-mail-bulk"></i></span> Create Task</h5>
+                    <button type="button" class="close" data-dismiss="modal" aria-label="Close">
+                    <span aria-hidden="true">&times;</span>
+                    </button>
+                </div>
+                <div class="modal-body">
+                    <div class="form-group">
+                        <label class="mb-0">Task Name</label>
+                        <input ng-model="task.TaskName" type="text" class="form-control" placeholder="Task name here.." required>
+                    </div>
+    
+                    <div class="form-group">
+                        <label class="mb-0">Description</label>
+                        <textarea ng-model="task.Descrip" rows="3" class="form-control"></textarea>
+                    </div>
+    
+                    <div class="form-row">
+                        <div class="form-group col-sm-4">
+                            <label class="mb-0">Priority</label>
+                            <select ng-model="task.Prio" ng-options="prio as prio for prio in priorities" class="form-control form-control-sm" required></select>
+                        </div>
+    
+                        <div class="form-group col-sm-4">
+                            <label class="mb-0">Date Due</label>
+                            <input ng-model="task.DateDue" type="date" class="form-control">
+                        </div>
+                    </div>
+                </div>
+                <div class="modal-footer">
+                    <button type="submit" class="btn btn-primary">Add Task</button>
+                </div>
+            </form>
+        </div>
+    </div>
+</div>
+
+<!--EDIT TASK---------------------------------------------------------------------------->
+<div class="modal fade" id="modal-edit-task" tabindex="-1" role="dialog">
+    <div class="modal-dialog modal-lg" role="document">
+        <div class="modal-content">
+            <form ng-submit="updateTask(task)">
+                <div class="modal-header">
+                    <h5 class="modal-title"><span class="text-muted mr-3"><i class="fa fa-mail-bulk"></i></span> Modify Task</h5>
+                    <button type="button" class="close" data-dismiss="modal" aria-label="Close">
+                    <span aria-hidden="true">&times;</span>
+                    </button>
+                </div>
+                <div class="modal-body border-bottom py-2">
+                    <div class="form-row mb-2">
+                        <div class="col-sm-4">
+                            <div class="form-group mb-0">
+                                <label class="small text-muted mb-0">CREATED</label>
+                                <input ng-model="task.DateCreated" type="text" class="form-control form-control-sm mb-2" readonly>
+                                <input ng-model="task.CreatedBy" type="text" class="form-control form-control-sm" readonly>
+                            </div>
+                        </div>
+                        <div class="col-sm-4">
+                            <div class="form-group mb-0">
+                                <label class="small text-muted mb-0">STARTED</label>
+                                <input ng-model="task.DateStarted" type="text" class="form-control form-control-sm mb-2" readonly>
+                                <input ng-model="task.StartedBy" type="text" class="form-control form-control-sm" readonly>
+                            </div>
+                        </div>
+                        <div class="col-sm-4">
+                            <div class="form-group mb-0">
+                                <label class="small text-muted mb-0">CLOSED</label>
+                                <input ng-model="task.DateClosed" type="text" class="form-control form-control-sm mb-2" readonly>
+                                <input ng-model="task.ClosedBy" type="text" class="form-control form-control-sm" readonly>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="modal-body pt-2">
+                    <div class="form-group">
+                        <label class="mb-0">Task Name</label>
+                        <input ng-model="task.TaskName" type="text" class="form-control" placeholder="Task name here.." required>
+                    </div>
+    
+                    <div class="form-group">
+                        <label class="mb-0">Description</label>
+                        <textarea ng-model="task.Descrip" rows="3" class="form-control"></textarea>
+                    </div>
+    
+                    <div class="form-row">
+                        <div class="form-group col-sm-4">
+                            <label class="mb-0">Priority</label>
+                            <select ng-model="task.Prio" ng-options="prio as prio for prio in priorities" class="form-control form-control-sm" required></select>
+                        </div>
+    
+                        <div class="form-group col-sm-4">
+                            <label class="mb-0">Date Due</label>
+                            <input ng-model="task.DateDue" type="date" class="form-control">
+                        </div>
+                    </div>
+                </div>
+                <div class="modal-footer">
+                    <button type="submit" class="btn btn-primary hvr-icon-back"><i class="fa fa-save hvr-icon"></i> Update Task</button>
+                    <button ng-click="removeTask(task)" type="button" class="btn btn-danger hvr-icon-back"><i class="fa fa-trash hvr-icon"></i> Delete Task</button>
+                    <button ng-click="completeTask(task)" ng-show="showCompleteBtn" type="button" class="btn btn-success hvr-icon-back"><i class="fa fa-check hvr-icon"></i> <span class="hvr-icon">Complete Task</span></button>
+                </div>
+            </form>
+        </div>
+    </div>
+</div>

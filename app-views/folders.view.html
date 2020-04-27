@@ -1,0 +1,269 @@
+<h3 class="my-4"><span class="text-secondary mr-3"><i class="fa fa-folder-open"></i></span> Folders <button ng-disabled="listmode" ng-click="newFolderModal()" class="btn btn-default text-primary ml-3 hvr-icon-bob" title="Add New Folder"><i class="fa fa-plus hvr-icon"></i></button></h3>
+
+<div ng-show="!listmode" class="row mt-3">
+    <div class="col-xl-3 col-sm-6 py-2 repeat-animation" ng-repeat="item in folders">
+        <!-- <div ng-mouseover="showremove[$index] = true;" ng-mouseout="showremove[$index] = false" class="card h-100"> -->
+        <div class="card h-100 pb-2" ng-mouseover="showremove[$index] = true;" ng-mouseout="showremove[$index] = false">
+            <div>
+                <span ng-click="remove(item.FolderId)" ng-class="{ 'invisible': !showremove[$index] }" class="float-right pointer text-danger mr-2" title="Remove folder"><i class="fa fa-1x fa-times"></i></span>
+            </div>
+            <div class="card-body d-flex flex-row align-items-start pt-0 pb-2 px-4">
+                <div>
+                    <span class="text-secondary" title="{{ item.CreatedBy }}"><i class="fa fa-user-circle fa-3x"></i></span>
+                </div>
+                <div class="text-right w-100">
+                    <h6 ng-click="editFolderModal(item.FolderId)" class="mb-0 text-right link">{{ item.FolderName }}</h6>
+                    <button ng-click="getLists(item.FolderId)" class="btn btn-xs btn-info rounded-3 mt-2 pl-3 hvr-icon-forward">
+                      Lists <span class="badge badge-light">{{ (item.Lists > 0 ? item.Lists : '') }}</span> <span class="ml-2"><i class="fa fa-chevron-circle-right hvr-icon"></i></span>
+                    </button>
+                    <!-- <p ng-click="lists(item.FolderId)" class="mt-0 text-right link-secondary" title="Folder list(s)">{{ item.Lists | number }} <span class="text-muted"><i class="fa fa-list-ul"></i></span></p> -->
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+<!-----------------------List Mode------------------------------>
+  <div class="row" ng-show="listmode">
+    <div class="offset-1 col-sm-10">
+      <div class="card slide-animation">
+        <div class="card-header d-flex justify-content-between">
+          <span ng-click="listmode = false" class="link hvr-icon-back" title="Return to folders"><i class="fa fa-2x fa-arrow-left hvr-icon"></i></span>
+          <h5><span class="badge badge-secondary">{{ folder.FolderName }}</span></h5>
+          <span></span>
+        </div>
+        <div class="card-body">
+          <div class="row">
+            <div class="col-sm-6">
+              <div class="card border-0">
+                <div class="card-header">
+                  <h6 class="card-title d-flex align-items-center justify-content-between">
+                    Lists
+                    <span ng-click="newListModal()" class="link hvr-icon-bob" title="Add new list"><i class="fa fa-plus hvr-icon"></i></span>
+                  </h6>
+                </div>
+
+                <input ng-show="lists.length > 0" ng-keydown="listUsersMode=false; listEditMode=false;" ng-model="searchList" type="text" class="form-control mb-2 w-50" placeholder="Search list..">
+
+                <div class="table-wrapper">
+                  <table class="table table-hover">
+                    <tbody>
+                      <tr ng-repeat="item in lists | filter:{ListName:searchList}" class="repeat-animation">
+                        <td ng-click="editListModal(item.ListId)" class="link" title="Rename list">
+                          {{ item.ListName }} 
+                          <span class="badge {{item.Type=='BP' ? 'badge-primary' : 'badge-warning'}}">{{item.Type=='BP' ? 'Blueprints' : 'Tasks'}}</span></td>
+                        <td class="text-right">
+                          <button ng-click="usersList(item.ListId)" class="btn btn-default text-info py-0 px-1" title="Share with.."><i class="fa fa-user-friends"></i></button>
+                          <button ng-click="getStatuses(item.ListId)" class="btn btn-default text-primary py-0 px-1" title="Statuses"><i class="fa fa-pen"></i></button>
+                          <button ng-click="removeList(item.ListId)" class="btn btn-default text-danger py-0 px-1" title="Remove list"><i class="fa fa-trash"></i></button>
+                        </td>
+                      </tr>
+                    </tbody>
+                  </table>
+                </div>
+              </div>
+            </div><!--/col-->
+            <div class="col-sm-6">
+              <!--USERS------------------------->
+              <div ng-show="listUsersMode" class="card rounded show-hide-animation">
+                <div class="card-header bg-light">
+                  <h6 class="card-title">{{ list.ListName }} [Users]</h6>
+                </div>
+                <div class="card-body bg-light">
+                  <input ng-model='searchUser'
+                                   uib-typeahead='item.UserId as item.UserName for item in usersmenu | filter:$viewValue | limitTo: 10'
+                                   typeahead-on-select="addUser($item,$model,$label)"
+                                   class="form-control form-control-sm"
+                                   placeholder="Search user/team to add..." />
+                  
+                  <div class="table-wrapper">
+                    <table class="table table-hover mb-0 mt-3">
+                      <tbody>
+                        <tr ng-repeat="item in users" class="repeat-animation">
+                          <td>{{ item.UserName }}</td>
+                          <td class="text-center"><span ng-click="removeUser(list.ListId,item.UserId,item.Typ)" class="link-danger" title="Remove user"><i class="fa fa-times"></i></span></td>
+                        </tr>
+                      </tbody>
+                    </table>
+                  </div>
+                </div><!--/card-body-->
+              </div><!--/card-->
+
+              <!--STATUSES------------------------>
+              <div ng-show="listEditMode" class="card rounded show-hide-animation">
+                <div class="card-header bg-light">
+                  <h6 class="card-title">{{ list.ListName }} [Statuses]</h6>
+                </div>
+                <div class="card-body bg-light pt-0">
+                  <span class="text-secondary">
+                    OPEN STATUSES
+                    <span ng-click="statusModal(0,'OPEN')" class="link ml-3"><i class="fa fa-plus"></i></span>
+                  </span>
+                  <table class="table table-hover">
+                    <tbody>
+                      <tr ng-repeat="item in statuses | filter:{Typ:'OPEN'}" class="repeat-animation">
+                        <td><span ng-click="statusModal(item.StatId,'')" class="link">{{ item.StatName }}</span></td>
+                        <td class="text-center"><span ng-show="$index != 0" ng-click="removeStatus(list.ListId, item.StatId)" class="link-danger" title="Remove status"><i class="fa fa-times"></i></span></td>
+                      </tr>
+                    </tbody>
+                  </table>
+                </div><!--/card-body-->
+                <div class="card-body bg-light pt-0">
+                  <span class="text-secondary">
+                    CLOSED STATUSES
+                    <span ng-click="statusModal(0,'CLOSED')" class="link ml-3"><i class="fa fa-plus"></i></span>
+                  </span>
+                  <table class="table table-hover">
+                    <tbody>
+                      <tr ng-repeat="item in statuses | filter:{Typ:'CLOSED'}">
+                        <td><span ng-click="statusModal(item.StatId,'')" class="link">{{ item.StatName }}</span></td>
+                        <td class="text-center"><span ng-show="$index != 0" ng-click="removeStatus(item.StatId)" class="link-danger" title="Remove status"><i class="fa fa-times"></i></span></td>
+                      </tr>
+                    </tbody>
+                  </table>
+                </div><!--/card-body-->
+
+                
+              </div><!--/listmode-->
+            </div><!--/col-->
+          </div><!--row--> 
+        </div><!--/card-body-->
+      </div><!--/card-->    
+    </div><!--/col-->
+  </div><!--/row-->
+
+
+<!------------------------------------MODALS------------------------------------>
+
+<!--Edit List Modal -->
+<div class="modal fade" id="modal-edit-list" tabindex="-1" role="dialog">
+  <div class="modal-dialog" role="document">
+    <div class="modal-content border-0">
+      <div class="modal-header">
+        <h5 class="modal-title">Rename List</h5>
+        <button type="button" class="close" data-dismiss="modal" aria-label="Close">
+          <span aria-hidden="true">&times;</span>
+        </button>
+      </div>
+      <div class="modal-body">
+        <div class="form-group">
+            <label class="mb-0">List Name</label>
+            <input ng-model="list.ListName" type="text" class="form-control" Placeholder="Enter list name here..">
+        </div>
+
+      </div>
+      <div class="modal-footer">
+        <button ng-click="updateList(list.ListId, list.ListName)" type="button" class="btn btn-primary">Update List</button>
+      </div>
+    </div>
+  </div>
+</div>
+
+<!--New List Modal -->
+<div class="modal fade" id="modal-new-list" tabindex="-1" role="dialog">
+  <div class="modal-dialog" role="document">
+    <div class="modal-content border-0">
+      <div class="modal-header">
+        <h5 class="modal-title">Create List</h5>
+        <button type="button" class="close" data-dismiss="modal" aria-label="Close">
+          <span aria-hidden="true">&times;</span>
+        </button>
+      </div>
+      <div class="modal-body">
+        <div class="form-group">
+            <label class="mb-0">List Name</label>
+            <input ng-model="list.ListName" type="text" class="form-control" Placeholder="Enter list name here..">
+        </div>
+
+        <div class="form-group">
+          <div class="custom-control custom-radio custom-control-inline">
+            <input ng-model="list.Type" ng-value="'TASKS'" type="radio" name="radio-tasks" id="radio-tasks" class="custom-control-input">
+            <label class="custom-control-label" for="radio-tasks">Tasks</label>
+          </div>
+          <div class="custom-control custom-radio custom-control-inline">
+            <input ng-model="list.Type" ng-value="'BP'" type="radio" name="radio-blueprints" id="radio-blueprints" class="custom-control-input">
+            <label class="custom-control-label" for="radio-blueprints">Blueprints</label>
+          </div>
+        </div>
+
+      </div>
+      <div class="modal-footer">
+        <button ng-click="addList(folder.FolderId, list.ListName, list.Type)" type="button" class="btn btn-primary">Create List</button>
+      </div>
+    </div>
+  </div>
+</div>
+
+<!--New Folder Modal -->
+<div class="modal fade" id="modal-new-folder" tabindex="-1" role="dialog">
+  <div class="modal-dialog" role="document">
+    <div class="modal-content border-0">
+      <div class="modal-header">
+        <h5 class="modal-title">Create Folder</h5>
+        <button type="button" class="close" data-dismiss="modal" aria-label="Close">
+          <span aria-hidden="true">&times;</span>
+        </button>
+      </div>
+      <div class="modal-body">
+        <div class="form-group">
+            <label class="mb-0">Folder Name</label>
+            <input ng-model="folder.FolderName" type="text" class="form-control" Placeholder="Enter folder name here..">
+        </div>
+
+      </div>
+      <div class="modal-footer">
+        <button ng-click="add(folder.FolderName)" type="button" class="btn btn-primary">Create Folder</button>
+      </div>
+    </div>
+  </div>
+</div>
+
+<!--Edit Folder Modal -->
+<div class="modal fade" id="modal-edit-folder" tabindex="-1" role="dialog">
+  <div class="modal-dialog" role="document">
+    <div class="modal-content border-0">
+      <div class="modal-header">
+        <h5 class="modal-title">Rename Folder</h5>
+        <button type="button" class="close" data-dismiss="modal" aria-label="Close">
+          <span aria-hidden="true">&times;</span>
+        </button>
+      </div>
+      <div class="modal-body">
+        <div class="form-group">
+            <label class="mb-0">Folder Name</label>
+            <input ng-model="folder.FolderName" type="text" class="form-control" Placeholder="Enter folder name here..">
+        </div>
+
+      </div>
+      <div class="modal-footer">
+        <button ng-click="update(folder.FolderId, folder.FolderName)" type="button" class="btn btn-primary">Update Folder</button>
+      </div>
+    </div>
+  </div>
+</div>
+
+<!--Status Modal -->
+<div class="modal fade" id="modal-status" tabindex="-1" role="dialog">
+  <div class="modal-dialog" role="document">
+    <div class="modal-content border-0">
+      <div class="modal-header">
+        <h5 ng-show="addStatMode" class="modal-title">Add {{ status.Typ }} Status</h5>
+        <h5 ng-show="!addStatMode" class="modal-title">Modify Status</h5>
+        <button type="button" class="close" data-dismiss="modal" aria-label="Close">
+          <span aria-hidden="true">&times;</span>
+        </button>
+      </div>
+      <div class="modal-body">
+        <div class="form-group">
+            <label class="mb-0">Status Label</label>
+            <input ng-model="status.StatName" type="text" class="form-control" Placeholder="Enter status name here..">
+        </div>
+
+      </div>
+      <div class="modal-footer">
+        <button ng-show="addStatMode" ng-click="addStatus(list.ListId, status.StatName, status.Typ)" type="button" class="btn btn-primary">Add Status</button>
+        <button ng-show="!addStatMode" ng-click="updateStatus(list.ListId, status.StatId, status.StatName)" type="button" class="btn btn-primary">Update Status</button>
+      </div>
+    </div>
+  </div>
+</div>
