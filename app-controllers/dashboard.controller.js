@@ -3,8 +3,8 @@
 
     angular.module('app').controller('DashboardController', Controller);
 
-    Controller.$inject = ['FolderService', 'ListService', 'TaskService', 'BlueprintService', 'MasterDataService', '$scope', '$filter', '$ngConfirm', 'toastr','$localStorage'];
-    function Controller(fs, ls, ts, bps, mds, $scope, $filter, confirm, toastr, storage) {
+    Controller.$inject = ['UserService','DashboardService','FolderService', 'ListService', 'TaskService', 'BlueprintService', 'MasterDataService', '$scope', '$filter', '$ngConfirm', 'toastr','$localStorage'];
+    function Controller(us, dbs, fs, ls, ts, bps, mds, $scope, $filter, confirm, toastr, storage) {
         //variables
         $scope.empname = storage.currentUser.EmpName;
 
@@ -31,36 +31,54 @@
         $scope.completeBlueprint = completeBlueprint;
         $scope.modalNewBlueprint = modalNewBlueprint;
         $scope.modalEditBlueprint = modalEditBlueprint;
+        $scope.modalMembers = modalMembers;
         
         //functions
         init();
         function init() {
+            getteams();
             getfolders(); 
             getpriorities();
+        }
+
+        function getteams() {
+            dbs.teams(function(response) {
+                console.log(response)
+                if(response.success) {
+                    $scope.teams = response.data;
+                }
+            })
         }
 
         function getlists(folderid) {
             $scope.listmode = true;
             $scope.taskMode = false;
             $scope.folder = $scope.folders.find(x => x.FolderId == folderid);
-            ls.get(folderid, function(response) {
+            dbs.lists(folderid, function(response) {
                 $scope.lists = response.data;
             });
         }
 
         function getfolders() {
-            fs.get(function(response) {
+            dbs.folders(function(response) {
                 if(response.success) {
                     $scope.folders = response.data;
                 }
             })
         }
 
+
         function getpriorities() {
             mds.priorities(function(response) {
                 $scope.task.Prio = 'LOW';
                 $scope.priorities = response.data;
             })
+        }
+
+        function getmembers(teamid) {
+            us.get(teamid, function(response) {
+                $scope.members = response.data;
+            });
         }
 
         //------------------------TASKS AND BLUEPRINTS FUNCTIONS---------------------//
@@ -445,6 +463,12 @@
             return sortableOption;
         }
         //------------------------------MODALS-----------------------------------//
+        function modalMembers(teamid) {
+            getmembers(teamid);
+            $scope.teamname = $scope.teams.find(x => x.TeamId == teamid).TeamName;
+            angular.element("#modal-members").modal("show");
+        }
+
         function modalNewBlueprint() {
             $scope.blueprint = {};
             $scope.blueprint.Prio = 'LOW';

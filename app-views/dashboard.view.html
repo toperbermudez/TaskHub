@@ -1,5 +1,19 @@
 <h3 class="my-4"><span class="text-secondary mr-3"><i class="fa fa-tachometer-alt"></i></span> Dashboard</h3>
 
+<div ng-show="teams.length > 0 && !taskMode" class="row mb-sm-3 mb-md-4">
+    <div class="col-sm-12">
+        <h5>Teams</h5>
+    </div>
+    <div ng-repeat="item in teams"class="col-sm-3 mb-3">
+        <div class="card">
+            <div class="card-body">
+                <h6 class="card-title">{{item.TeamName}}</h6>
+                <span ng-click="modalMembers(item.TeamId)" class="badge badge-pill badge-info pointer hvr-grow">{{item.Users}} <i class="fa fa-user-friends"></i></span>
+            </div>
+        </div>
+    </div>
+</div>
+
 <div ng-show="!taskMode" class="row">
     <div class="col-sm-6">
         <div class="card">
@@ -11,7 +25,7 @@
                     <em>Data not found.</em>
                 </div>
                 <input ng-show="folders.length > 0" ng-model="searchFolder" type="text" class="form-control mb-2" placeholder="Search folder..">
-                <div class="table-wrapper">
+                <div ng-show="folders.length > 0" class="table-wrapper">
                     <table class="table table-hover">
                         <thead class="thead-light">
                             <tr class="text-center">
@@ -395,6 +409,31 @@
                     <button ng-click="completeTask(task)" ng-show="showCompleteBtn" type="button" class="btn btn-success hvr-icon-back"><i class="fa fa-check hvr-icon"></i> <span class="hvr-icon">Complete Task</span></button>
                 </div>
             </form>
+        </div>
+    </div>
+</div>
+
+<!--TEAM MEMBERS---------------------------------------------------------------------------->
+<div class="modal fade" id="modal-members" tabindex="-1" role="dialog">
+    <div class="modal-dialog modal-lg" role="document">
+        <div class="modal-content">
+            <div class="modal-header border-bottom-0">
+                <h5 class="modal-title"><span class="text-muted mr-3"><i class="fa fa-user-friends"></i></span> {{teamname}}</h5>
+                <button type="button" class="close" data-dismiss="modal" aria-label="Close">
+                <span aria-hidden="true">&times;</span>
+                </button>
+            </div>
+            <div class="modal-body">
+                <div class="table-wrapper">
+                    <table class="table table-hover">
+                        <tbody>
+                            <tr ng-repeat="item in members">
+                                <td><span class="text-muted mr-3"><i class="fa fa-user"></i></span> {{item.EmpName}}</td>
+                            </tr>
+                        </tbody>
+                    </table>
+                </div>
+            </div>
         </div>
     </div>
 </div>
